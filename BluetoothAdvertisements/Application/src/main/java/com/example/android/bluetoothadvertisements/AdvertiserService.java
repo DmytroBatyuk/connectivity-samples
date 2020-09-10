@@ -19,6 +19,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -30,7 +31,6 @@ public class AdvertiserService extends Service {
 
     private static final String TAG = AdvertiserService.class.getSimpleName();
 
-    private static final int FOREGROUND_NOTIFICATION_ID = 1;
     private static final String NOTIFICATION_CHANNEL_ID = "advertiser_service_id";
 
     /**
@@ -144,6 +144,13 @@ public class AdvertiserService extends Service {
             mAdvertiseCallback = new SampleAdvertiseCallback();
 
             if (mBluetoothLeAdvertiser != null) {
+                AppSettings.getInstance().advertiserChangeListener = new AppSettings.OnAdvertiserSettingsChanged() {
+                    @Override
+                    public void onChanged() {
+                        stopAdvertising();
+                        startAdvertising();
+                    }
+                };
                 mBluetoothLeAdvertiser.startAdvertising(settings, data,
                     mAdvertiseCallback);
             }
@@ -179,7 +186,7 @@ public class AdvertiserService extends Service {
                     .setSmallIcon(R.drawable.ic_launcher)
                     .setContentIntent(pendingIntent)
                     .build();
-        startForeground(FOREGROUND_NOTIFICATION_ID, n);
+        startForeground(new Random().nextInt(), n);
     }
 
     /**
@@ -188,6 +195,7 @@ public class AdvertiserService extends Service {
     private void stopAdvertising() {
         Log.d(TAG, "Service: Stopping Advertising");
         if (mBluetoothLeAdvertiser != null) {
+            AppSettings.getInstance().advertiserChangeListener = null;
             mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
             mAdvertiseCallback = null;
         }
@@ -224,8 +232,9 @@ public class AdvertiserService extends Service {
      */
     private AdvertiseSettings buildAdvertiseSettings() {
         AdvertiseSettings.Builder settingsBuilder = new AdvertiseSettings.Builder();
-        settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER);
-        settingsBuilder.setTimeout(0);
+        settingsBuilder.setAdvertiseMode(AppSettings.getInstance().getAdvertiseMode());
+        settingsBuilder.setTimeout(AppSettings.getInstance().getAdvertiseTimeout());
+        settingsBuilder.setTxPowerLevel(AppSettings.getInstance().getAdvertisePower());
         return settingsBuilder.build();
     }
 

@@ -21,23 +21,34 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentTransaction;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentTransaction;
 
 /**
  * Setup display fragments and ensure the device supports Bluetooth.
  */
 public class MainActivity extends FragmentActivity {
+    private final int REFRESH_ID = 0;
+    private final int SETTINGS_ID = 1;
 
     private BluetoothAdapter mBluetoothAdapter;
+    private ScannerFragment scannerFragment;
+    private AdvertiserFragment advertiserFragment;
+    private boolean isRefreshVisible = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setTitle(R.string.activity_main_title);
+        scannerFragment = new ScannerFragment();
+        advertiserFragment = new AdvertiserFragment();
 
         if (savedInstanceState == null) {
 
@@ -108,15 +119,52 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (isRefreshVisible) {
+            menu.add(Menu.NONE, REFRESH_ID, REFRESH_ID, R.string.refresh)
+                    .setIcon(R.drawable.ic_action_refresh)
+                    .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        }
+        menu.add(Menu.NONE, SETTINGS_ID, SETTINGS_ID, R.string.settings)
+                .setIcon(R.drawable.ic_baseline_settings_24)
+                .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case REFRESH_ID:
+                refreshScanner();
+                return true;
+            case SETTINGS_ID:
+                showSettings();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public void updateRefreshMenuItem(boolean visible) {
+        isRefreshVisible = visible;
+        invalidateOptionsMenu();
+    }
+
+    private void refreshScanner() {
+        scannerFragment.startScanning();
+    }
+
+    private void showSettings() {
+        SettingsDialogUtils.showSettings(this);
+    }
+
     private void setupFragments() {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-        ScannerFragment scannerFragment = new ScannerFragment();
         // Fragments can't access system services directly, so pass it the BluetoothAdapter
         scannerFragment.setBluetoothAdapter(mBluetoothAdapter);
         transaction.replace(R.id.scanner_fragment_container, scannerFragment);
-
-        AdvertiserFragment advertiserFragment = new AdvertiserFragment();
         transaction.replace(R.id.advertiser_fragment_container, advertiserFragment);
 
         transaction.commit();

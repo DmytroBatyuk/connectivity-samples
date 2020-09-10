@@ -24,19 +24,17 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.fragment.app.ListFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.ListFragment;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -74,7 +72,6 @@ public class ScannerFragment extends ListFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
         setRetainInstance(true);
 
         // Use getActivity().getApplicationContext() instead of just getActivity() because this
@@ -114,21 +111,9 @@ public class ScannerFragment extends ListFragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.scanner_menu, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case R.id.refresh:
-                startScanning();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+    public void onDestroyView() {
+        super.onDestroyView();
+        stopScanning();
     }
 
     /**
@@ -136,23 +121,43 @@ public class ScannerFragment extends ListFragment {
      */
     public void startScanning() {
         if (mScanCallback == null) {
+            AppSettings.getInstance().scannerChangeListener = new AppSettings.OnScannerSettingsChanged() {
+                @Override
+                public void onChanged() {
+                    stopScanning();
+                    startScanning();
+                }
+            };
             Log.d(TAG, "Starting Scanning");
 
-            // Will stop the scanning after a set time.
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    stopScanning();
-                }
-            }, SCAN_PERIOD);
+            int scanPeriodSeconds = AppSettings.getInstance().getScanPeriodSeconds();
+
+            if (scanPeriodSeconds > 0) {
+                // Will stop the scanning after a set time.
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        stopScanning();
+                    }
+                }, scanPeriodSeconds * 1000);
+            }
 
             // Kick off a new scan.
             mScanCallback = new SampleScanCallback();
             mBluetoothLeScanner.startScan(buildScanFilters(), buildScanSettings(), mScanCallback);
+            FragmentActivity activity = getActivity();
+            if (null != activity) {
+                ((MainActivity) activity).updateRefreshMenuItem(false);
+            }
 
-            String toastText = getString(R.string.scan_start_toast) + " "
-                    + TimeUnit.SECONDS.convert(SCAN_PERIOD, TimeUnit.MILLISECONDS) + " "
-                    + getString(R.string.seconds);
+            String toastText;
+            if (scanPeriodSeconds > 0) {
+                toastText = getString(R.string.scan_start_toast) + " "
+                        + scanPeriodSeconds + " "
+                        + getString(R.string.seconds);
+            } else {
+                toastText = "Scanning infinitive";
+            }
             Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
         } else {
             Toast.makeText(getActivity(), R.string.already_scanning, Toast.LENGTH_SHORT);
@@ -164,6 +169,7 @@ public class ScannerFragment extends ListFragment {
      */
     public void stopScanning() {
         Log.d(TAG, "Stopping Scanning");
+        AppSettings.getInstance().scannerChangeListener = null;
 
         // Stop the scan, wipe the callback.
         mBluetoothLeScanner.stopScan(mScanCallback);
@@ -171,6 +177,11 @@ public class ScannerFragment extends ListFragment {
 
         // Even if no new results, update 'last seen' times.
         mAdapter.notifyDataSetChanged();
+
+        FragmentActivity activity = getActivity();
+        if (null != activity) {
+            ((MainActivity) activity).updateRefreshMenuItem(true);
+        }
     }
 
     /**
@@ -192,7 +203,7 @@ public class ScannerFragment extends ListFragment {
      */
     private ScanSettings buildScanSettings() {
         ScanSettings.Builder builder = new ScanSettings.Builder();
-        builder.setScanMode(ScanSettings.SCAN_MODE_LOW_POWER);
+        builder.setScanMode(AppSettings.getInstance().getScanMode());
         return builder.build();
     }
 
@@ -204,6 +215,11 @@ public class ScannerFragment extends ListFragment {
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
             super.onBatchScanResults(results);
+            ArrayList<String> macs = new ArrayList<>(results.size());
+            for (ScanResult result : results) {
+                macs.add(result.getDevice().getAddress());
+            }
+            Log.e("DIMA", "onBatchScanResults: list=" + macs);
 
             for (ScanResult result : results) {
                 mAdapter.add(result);
@@ -214,7 +230,19 @@ public class ScannerFragment extends ListFragment {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
-
+            String cbType = "--";
+            switch (callbackType) {
+                case ScanSettings.CALLBACK_TYPE_ALL_MATCHES:
+                    cbType = "ALL_MATCHES";
+                    break;
+                case ScanSettings.CALLBACK_TYPE_FIRST_MATCH:
+                    cbType = "FIRST_MATCH";
+                    break;
+                case ScanSettings.CALLBACK_TYPE_MATCH_LOST:
+                    cbType = "MATCH_LOST";
+                    break;
+            }
+            Log.e("DIMA", "onScanResult: mac=" + result.getDevice().getAddress() + ", cbType=" + cbType);
             mAdapter.add(result);
             mAdapter.notifyDataSetChanged();
         }

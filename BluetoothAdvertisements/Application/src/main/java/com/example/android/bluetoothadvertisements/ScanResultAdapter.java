@@ -26,6 +26,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -34,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 public class ScanResultAdapter extends BaseAdapter {
 
     private ArrayList<ScanResult> mArrayList;
+    private HashMap<String, Long> macAddressToLastSeenTime = new HashMap<>();
 
     private Context mContext;
 
@@ -72,6 +74,7 @@ public class ScanResultAdapter extends BaseAdapter {
         TextView deviceNameView = (TextView) view.findViewById(R.id.device_name);
         TextView deviceAddressView = (TextView) view.findViewById(R.id.device_address);
         TextView lastSeenView = (TextView) view.findViewById(R.id.last_seen);
+        TextView lastSeen = (TextView) view.findViewById(R.id.lastSeen);
 
         ScanResult scanResult = mArrayList.get(position);
 
@@ -82,6 +85,16 @@ public class ScanResultAdapter extends BaseAdapter {
         deviceNameView.setText(name);
         deviceAddressView.setText(scanResult.getDevice().getAddress());
         lastSeenView.setText(getTimeSinceString(mContext, scanResult.getTimestampNanos()));
+        long frequencyMillis = 0;
+        if (macAddressToLastSeenTime.containsKey(scanResult.getDevice().getAddress())) {
+            long lastSeenNanos = macAddressToLastSeenTime.get(scanResult.getDevice().getAddress());
+            frequencyMillis = TimeUnit.MILLISECONDS.convert(scanResult.getTimestampNanos() - lastSeenNanos, TimeUnit.NANOSECONDS);
+        }
+        if (frequencyMillis > 0) {
+            lastSeen.setText("Last seen: " + frequencyMillis + " ms");
+        } else {
+            lastSeen.setText("");
+        }
 
         return view;
     }
@@ -111,6 +124,8 @@ public class ScanResultAdapter extends BaseAdapter {
 
         if (existingPosition >= 0) {
             // Device is already in list, update its record.
+            ScanResult scanResultOld = mArrayList.get(existingPosition);
+            macAddressToLastSeenTime.put(scanResultOld.getDevice().getAddress(), scanResultOld.getTimestampNanos());
             mArrayList.set(existingPosition, scanResult);
         } else {
             // Add new Device's ScanResult to list.
@@ -123,6 +138,7 @@ public class ScanResultAdapter extends BaseAdapter {
      */
     public void clear() {
         mArrayList.clear();
+        macAddressToLastSeenTime.clear();
     }
 
     /**
