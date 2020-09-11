@@ -147,7 +147,7 @@ public class ScannerFragment extends ListFragment {
             mBluetoothLeScanner.startScan(buildScanFilters(), buildScanSettings(), mScanCallback);
             FragmentActivity activity = getActivity();
             if (null != activity) {
-                ((MainActivity) activity).updateRefreshMenuItem(false);
+                ((MainActivity) activity).updateIsScanning(true);
             }
 
             String toastText;
@@ -180,7 +180,7 @@ public class ScannerFragment extends ListFragment {
 
         FragmentActivity activity = getActivity();
         if (null != activity) {
-            ((MainActivity) activity).updateRefreshMenuItem(true);
+            ((MainActivity) activity).updateIsScanning(false);
         }
     }
 

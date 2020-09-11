@@ -40,6 +40,7 @@ public class AdvertiserFragment extends Fragment implements View.OnClickListener
      * Lets user toggle BLE Advertising.
      */
     private Switch mSwitch;
+    private View progress;
 
     /**
      * Listens for notifications that the {@code AdvertiserService} has failed to start advertising.
@@ -47,6 +48,7 @@ public class AdvertiserFragment extends Fragment implements View.OnClickListener
      * is on-screen, so it's defined and registered in code instead of the Manifest.
      */
     private BroadcastReceiver advertisingFailureReceiver;
+    private BroadcastReceiver advertisingStatusReceiver;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -92,6 +94,17 @@ public class AdvertiserFragment extends Fragment implements View.OnClickListener
                 Toast.makeText(getActivity(), errorMessage, Toast.LENGTH_LONG).show();
             }
         };
+
+        advertisingStatusReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getBooleanExtra(AdvertiserService.ADVERTISING_STATUS_EXTRA, false)) {
+                    progress.setVisibility(View.VISIBLE);
+                } else {
+                    progress.setVisibility(View.INVISIBLE);
+                }
+            }
+        };
     }
 
     @Override
@@ -102,6 +115,7 @@ public class AdvertiserFragment extends Fragment implements View.OnClickListener
 
         mSwitch = (Switch) view.findViewById(R.id.advertise_switch);
         mSwitch.setOnClickListener(this);
+        progress = view.findViewById(R.id.advertising);
 
         return view;
     }
@@ -123,6 +137,8 @@ public class AdvertiserFragment extends Fragment implements View.OnClickListener
         IntentFilter failureFilter = new IntentFilter(AdvertiserService.ADVERTISING_FAILED);
         getActivity().registerReceiver(advertisingFailureReceiver, failureFilter);
 
+
+        requireActivity().registerReceiver(advertisingStatusReceiver, new IntentFilter(AdvertiserService.ADVERTISING_PROGRESS));
     }
 
     /**
@@ -133,6 +149,7 @@ public class AdvertiserFragment extends Fragment implements View.OnClickListener
     public void onPause() {
         super.onPause();
         getActivity().unregisterReceiver(advertisingFailureReceiver);
+        requireActivity().unregisterReceiver(advertisingStatusReceiver);
     }
 
     /**

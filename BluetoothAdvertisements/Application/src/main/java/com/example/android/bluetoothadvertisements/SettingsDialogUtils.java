@@ -128,7 +128,7 @@ public class SettingsDialogUtils {
             }
         }
 
-        final int[] selectedAdvertiseTimeout = {settings.getAdvertiseTimeout()};
+        final int[] selectedAdvertiseTimeout = {settings.getAdvertiseTerminationDelayMs()};
         {
             RadioGroup advertiseTimeout = root.findViewById(R.id.advertiseTimeout);
             final RadioButton[] selected = {null};
@@ -164,7 +164,7 @@ public class SettingsDialogUtils {
                         settings.setScanMode(selectedScanMode[0]);
                         settings.setAdvertiseMode(selectedAdvertiseMode[0]);
                         settings.setAdvertisePower(selectedAdvertisePower[0]);
-                        settings.setAdvertiseTimeout(selectedAdvertiseTimeout[0]);
+                        settings.setAdvertiseTerminationDelayMs(selectedAdvertiseTimeout[0]);
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -231,10 +231,10 @@ public class SettingsDialogUtils {
 
     private static final AdvertiseTerminationDuration[] ADVERTISE_TERMINATION_DURATIONS = new AdvertiseTerminationDuration[]{
             new AdvertiseTerminationDuration("Disabled", 0),
-            new AdvertiseTerminationDuration("2 seconds", 2 * 1000),
-            new AdvertiseTerminationDuration("5 seconds", 5 * 1000),
-            new AdvertiseTerminationDuration("10 seconds", 10 * 1000),
-            new AdvertiseTerminationDuration("15 seconds", 15 * 1000)
+            new AdvertiseTerminationDuration("30 seconds", 30 * 1000),
+            new AdvertiseTerminationDuration("1 minute", 60 * 1000),
+            new AdvertiseTerminationDuration("5 minutes", 5 * 60 * 1000),
+            new AdvertiseTerminationDuration("10 minutes", 10 * 60 * 1000)
     };
 
     private static class AdvertiseTerminationDuration {

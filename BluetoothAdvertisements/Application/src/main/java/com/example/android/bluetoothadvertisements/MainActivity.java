@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -146,8 +147,13 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    public void updateRefreshMenuItem(boolean visible) {
-        isRefreshVisible = visible;
+    public void updateIsScanning(boolean isScanning) {
+        isRefreshVisible = !isScanning;
+        if (isScanning) {
+            findViewById(R.id.scanning).setVisibility(View.VISIBLE);
+        } else {
+            findViewById(R.id.scanning).setVisibility(View.INVISIBLE);
+        }
         invalidateOptionsMenu();
     }
 

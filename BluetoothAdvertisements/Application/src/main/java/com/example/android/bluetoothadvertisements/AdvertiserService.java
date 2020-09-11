@@ -44,7 +44,11 @@ public class AdvertiserService extends Service {
     public static final String ADVERTISING_FAILED =
         "com.example.android.bluetoothadvertisements.advertising_failed";
 
+    public static final String ADVERTISING_PROGRESS =
+        "com.example.android.bluetoothadvertisements.advertising_progress";
+
     public static final String ADVERTISING_FAILED_EXTRA_CODE = "failureCode";
+    public static final String ADVERTISING_STATUS_EXTRA = "status";
 
     public static final int ADVERTISING_TIMED_OUT = 6;
 
@@ -59,11 +63,11 @@ public class AdvertiserService extends Service {
     /**
      * Length of time to allow advertising before automatically shutting off. (10 minutes)
      */
-    private long TIMEOUT = TimeUnit.MILLISECONDS.convert(10, TimeUnit.MINUTES);
 
     @Override
     public void onCreate() {
         running = true;
+        sendAdvertisingProgress(true);
         initialize();
         startAdvertising();
         setTimeout();
@@ -78,6 +82,7 @@ public class AdvertiserService extends Service {
          * is critical.
          */
         running = false;
+        sendAdvertisingProgress(false);
         stopAdvertising();
         mHandler.removeCallbacks(timeoutRunnable);
         stopForeground(true);
@@ -119,15 +124,18 @@ public class AdvertiserService extends Service {
      */
     private void setTimeout(){
         mHandler = new Handler();
-        timeoutRunnable = new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "AdvertiserService has reached timeout of "+TIMEOUT+" milliseconds, stopping advertising.");
-                sendFailureIntent(ADVERTISING_TIMED_OUT);
-                stopSelf();
-            }
-        };
-        mHandler.postDelayed(timeoutRunnable, TIMEOUT);
+        final int timeout = AppSettings.getInstance().getAdvertiseTerminationDelayMs();
+        if (timeout > 0) {
+            timeoutRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    Log.d(TAG, "AdvertiserService has reached timeout of " + timeout + " milliseconds, stopping advertising.");
+                    sendFailureIntent(ADVERTISING_TIMED_OUT);
+                    stopSelf();
+                }
+            };
+            mHandler.postDelayed(timeoutRunnable, timeout);
+        }
     }
 
     /**
@@ -198,6 +206,7 @@ public class AdvertiserService extends Service {
             AppSettings.getInstance().advertiserChangeListener = null;
             mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
             mAdvertiseCallback = null;
+            sendAdvertisingProgress(false);
         }
     }
 
@@ -233,7 +242,6 @@ public class AdvertiserService extends Service {
     private AdvertiseSettings buildAdvertiseSettings() {
         AdvertiseSettings.Builder settingsBuilder = new AdvertiseSettings.Builder();
         settingsBuilder.setAdvertiseMode(AppSettings.getInstance().getAdvertiseMode());
-        settingsBuilder.setTimeout(AppSettings.getInstance().getAdvertiseTimeout());
         settingsBuilder.setTxPowerLevel(AppSettings.getInstance().getAdvertisePower());
         return settingsBuilder.build();
     }
@@ -251,13 +259,14 @@ public class AdvertiserService extends Service {
             Log.d(TAG, "Advertising failed");
             sendFailureIntent(errorCode);
             stopSelf();
-
+            sendAdvertisingProgress(false);
         }
 
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
             super.onStartSuccess(settingsInEffect);
             Log.d(TAG, "Advertising successfully started");
+            sendAdvertisingProgress(true);
         }
     }
 
@@ -272,4 +281,9 @@ public class AdvertiserService extends Service {
         sendBroadcast(failureIntent);
     }
 
+    private void sendAdvertisingProgress(boolean performing) {
+        Intent i = new Intent(ADVERTISING_PROGRESS);
+        i.putExtra(ADVERTISING_STATUS_EXTRA, performing);
+        sendBroadcast(i);
+    }
 }

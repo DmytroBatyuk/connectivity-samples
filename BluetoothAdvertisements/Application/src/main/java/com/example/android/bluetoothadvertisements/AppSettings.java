@@ -6,11 +6,11 @@ import android.bluetooth.le.ScanSettings;
 public class AppSettings {
     private AppSettings() {}
 
-    private int scanPeriodSeconds = 5;
+    private int scanPeriodSeconds = 0;
     private int scanMode = ScanSettings.SCAN_MODE_LOW_POWER;
     private int advertiseMode = AdvertiseSettings.ADVERTISE_MODE_LOW_POWER;
     private int advertisePower = AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM;
-    private int advertiseTimeout = 0;
+    private int advertiseTerminationDelayMs = 0;
 
     public OnScannerSettingsChanged scannerChangeListener = null;
     public OnAdvertiserSettingsChanged advertiserChangeListener = null;
@@ -63,13 +63,13 @@ public class AppSettings {
         }
     }
 
-    public int getAdvertiseTimeout() {
-        return advertiseTimeout;
+    public int getAdvertiseTerminationDelayMs() {
+        return advertiseTerminationDelayMs;
     }
 
-    public void setAdvertiseTimeout(int advertiseTimeout) {
-        int prev = this.advertiseTimeout;
-        this.advertiseTimeout = advertiseTimeout;
+    public void setAdvertiseTerminationDelayMs(int advertiseTimeout) {
+        int prev = this.advertiseTerminationDelayMs;
+        this.advertiseTerminationDelayMs = advertiseTimeout;
         if (prev != advertiseTimeout && null != advertiserChangeListener) {
             advertiserChangeListener.onChanged();
         };
