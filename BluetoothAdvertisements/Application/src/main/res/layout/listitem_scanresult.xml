@@ -47,10 +47,10 @@
             tools:text="Last Seen: 17 seconds ago" />
 
         <TextView
-            android:id="@+id/lastSeen"
+            android:id="@+id/beforeSeen"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="12dp"
-            tools:text="Last seen: 200 ms" />
+            tools:text="Detected again in 200 ms" />
     </LinearLayout>
 </RelativeLayout>

@@ -34,5 +34,6 @@ public class Constants {
             .fromString("0000b81d-0000-1000-8000-00805f9b34fb");
 
     public static final int REQUEST_ENABLE_BT = 1;
+    public static final int REQUEST_LOCATION_PERMISSIONS = 2;
 
 }

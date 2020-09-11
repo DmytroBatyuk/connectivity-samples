@@ -25,7 +25,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -74,7 +76,7 @@ public class ScanResultAdapter extends BaseAdapter {
         TextView deviceNameView = (TextView) view.findViewById(R.id.device_name);
         TextView deviceAddressView = (TextView) view.findViewById(R.id.device_address);
         TextView lastSeenView = (TextView) view.findViewById(R.id.last_seen);
-        TextView lastSeen = (TextView) view.findViewById(R.id.lastSeen);
+        TextView beforeSeen = (TextView) view.findViewById(R.id.beforeSeen);
 
         ScanResult scanResult = mArrayList.get(position);
 
@@ -91,9 +93,9 @@ public class ScanResultAdapter extends BaseAdapter {
             frequencyMillis = TimeUnit.MILLISECONDS.convert(scanResult.getTimestampNanos() - lastSeenNanos, TimeUnit.NANOSECONDS);
         }
         if (frequencyMillis > 0) {
-            lastSeen.setText("Last seen: " + frequencyMillis + " ms");
+            beforeSeen.setText("Detected again in " + frequencyMillis + " ms");
         } else {
-            lastSeen.setText("");
+            beforeSeen.setText("");
         }
 
         return view;
@@ -150,6 +152,12 @@ public class ScanResultAdapter extends BaseAdapter {
 
         long timeSince = SystemClock.elapsedRealtimeNanos() - timeNanoseconds;
         long secondsSince = TimeUnit.SECONDS.convert(timeSince, TimeUnit.NANOSECONDS);
+        if (true) {
+            Calendar c = Calendar.getInstance();
+            c.add(Calendar.SECOND, (int) -secondsSince);
+            return SimpleDateFormat.getTimeInstance().format(c.getTime());
+        }
+
 
         if (secondsSince < 5) {
             lastSeenText += context.getResources().getString(R.string.just_now);

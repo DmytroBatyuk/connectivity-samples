@@ -7,7 +7,7 @@ public class AppSettings {
     private AppSettings() {}
 
     private int scanPeriodSeconds = 0;
-    private int scanMode = ScanSettings.SCAN_MODE_LOW_POWER;
+    private int scanMode = ScanSettings.SCAN_MODE_LOW_LATENCY;
     private int advertiseMode = AdvertiseSettings.ADVERTISE_MODE_LOW_POWER;
     private int advertisePower = AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM;
     private int advertiseTerminationDelayMs = 0;
