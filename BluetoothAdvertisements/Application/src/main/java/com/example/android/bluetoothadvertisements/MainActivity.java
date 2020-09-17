@@ -38,6 +38,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.android.bluetoothadvertisements.advertisement.AdvertiserFragment;
 import com.example.android.bluetoothadvertisements.scanning.ScannerFragment;
+import com.example.android.bluetoothadvertisements.scanning.StartScannerFragment;
 
 /**
  * Setup display fragments and ensure the device supports Bluetooth.
@@ -47,6 +48,7 @@ public class MainActivity extends FragmentActivity {
     private final int SETTINGS_ID = 1;
 
     private BluetoothAdapter mBluetoothAdapter;
+    private StartScannerFragment startScannerFragment;
     private ScannerFragment scannerFragment;
     private AdvertiserFragment advertiserFragment;
     private boolean isRefreshVisible = true;
@@ -56,6 +58,7 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setTitle(R.string.activity_main_title);
+        startScannerFragment = new StartScannerFragment();
         scannerFragment = new ScannerFragment();
         advertiserFragment = new AdvertiserFragment();
 
@@ -105,7 +108,7 @@ public class MainActivity extends FragmentActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (grantResults.length == 2 &&
                 (grantResults[0] == PackageManager.PERMISSION_GRANTED
-                || grantResults[1] == PackageManager.PERMISSION_GRANTED)
+                        || grantResults[1] == PackageManager.PERMISSION_GRANTED)
         ) {
             setupFragments();
         } else {
@@ -192,11 +195,19 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void setupFragments() {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-
+        final FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        startScannerFragment.callback = new StartScannerFragment.Callback() {
+            @Override
+            public void onStartScanner() {
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.scanner_fragment_container, scannerFragment)
+                        .commit();
+            }
+        };
         // Fragments can't access system services directly, so pass it the BluetoothAdapter
         scannerFragment.setBluetoothAdapter(mBluetoothAdapter);
-        transaction.replace(R.id.scanner_fragment_container, scannerFragment);
+        transaction.replace(R.id.scanner_fragment_container, startScannerFragment);
         transaction.replace(R.id.advertiser_fragment_container, advertiserFragment);
 
         transaction.commit();
