@@ -60,7 +60,7 @@ public class ScannerFragment extends ListFragment {
 
     private ScanCallback mScanCallback;
 
-    private ScanResultLogAdapter mAdapter;
+    private ScanResultAdapterAbs mAdapter;
 
     private Handler mHandler;
 
@@ -84,9 +84,12 @@ public class ScannerFragment extends ListFragment {
         //
         // We could get a LayoutInflater from the ApplicationContext but it messes with the
         // default theme, so generate it from getActivity() and pass it in separately.
-//        mAdapter = new ScanResultAdapter(getActivity().getApplicationContext(),
-//                LayoutInflater.from(getActivity()));
-        mAdapter = new ScanResultLogAdapter();
+        if (false) {
+            mAdapter = new ScanResultAdapter(getActivity().getApplicationContext(),
+                    LayoutInflater.from(getActivity()));
+        } else {
+            mAdapter = new ScanResultLogAdapter();
+        }
         mHandler = new Handler();
 
     }
@@ -120,14 +123,12 @@ public class ScannerFragment extends ListFragment {
     public void onPause() {
         super.onPause();
         mAdapter.add("background");
-        mAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onResume() {
         super.onResume();
         mAdapter.add("foreground");
-        mAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -241,10 +242,7 @@ public class ScannerFragment extends ListFragment {
             }
             Log.e("DIMA", "onBatchScanResults: list=" + macs);
 
-            for (ScanResult result : results) {
-                mAdapter.add(result);
-            }
-            mAdapter.notifyDataSetChanged();
+            mAdapter.add(results);
         }
 
         @Override
@@ -264,7 +262,6 @@ public class ScannerFragment extends ListFragment {
             }
             Log.e("DIMA", "onScanResult: mac=" + result.getDevice().getAddress() + ", cbType=" + cbType);
             mAdapter.add(result);
-            mAdapter.notifyDataSetChanged();
         }
 
         @Override
