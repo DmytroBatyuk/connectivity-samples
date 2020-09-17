@@ -1,4 +1,4 @@
-package com.example.android.bluetoothadvertisements;
+package com.example.android.bluetoothadvertisements.advertisement;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -19,8 +19,12 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.android.bluetoothadvertisements.AppSettings;
+import com.example.android.bluetoothadvertisements.Constants;
+import com.example.android.bluetoothadvertisements.MainActivity;
+import com.example.android.bluetoothadvertisements.R;
+
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Manages BLE Advertising independent of the main app.

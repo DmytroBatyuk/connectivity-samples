@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.bluetoothadvertisements;
+package com.example.android.bluetoothadvertisements.scanning;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -32,6 +32,11 @@ import android.widget.Toast;
 
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.ListFragment;
+
+import com.example.android.bluetoothadvertisements.AppSettings;
+import com.example.android.bluetoothadvertisements.Constants;
+import com.example.android.bluetoothadvertisements.MainActivity;
+import com.example.android.bluetoothadvertisements.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +60,7 @@ public class ScannerFragment extends ListFragment {
 
     private ScanCallback mScanCallback;
 
-    private ScanResultAdapter mAdapter;
+    private ScanResultLogAdapter mAdapter;
 
     private Handler mHandler;
 
@@ -79,8 +84,9 @@ public class ScannerFragment extends ListFragment {
         //
         // We could get a LayoutInflater from the ApplicationContext but it messes with the
         // default theme, so generate it from getActivity() and pass it in separately.
-        mAdapter = new ScanResultAdapter(getActivity().getApplicationContext(),
-                LayoutInflater.from(getActivity()));
+//        mAdapter = new ScanResultAdapter(getActivity().getApplicationContext(),
+//                LayoutInflater.from(getActivity()));
+        mAdapter = new ScanResultLogAdapter();
         mHandler = new Handler();
 
     }
@@ -108,6 +114,20 @@ public class ScannerFragment extends ListFragment {
         // Trigger refresh on app's 1st load
         startScanning();
 
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mAdapter.add("background");
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mAdapter.add("foreground");
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override

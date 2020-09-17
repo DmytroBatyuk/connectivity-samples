@@ -76,16 +76,16 @@ public class AppSettings {
     }
 
 
-    static AppSettings getInstance() {
+    public static AppSettings getInstance() {
         return instance;
     }
     private final static AppSettings instance = new AppSettings();
 
-    interface OnScannerSettingsChanged {
+    public interface OnScannerSettingsChanged {
         void onChanged();
     }
 
-    interface OnAdvertiserSettingsChanged {
+    public interface OnAdvertiserSettingsChanged {
         void onChanged();
     }
 }

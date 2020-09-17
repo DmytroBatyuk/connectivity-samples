@@ -36,7 +36,8 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 
-import java.lang.reflect.Array;
+import com.example.android.bluetoothadvertisements.advertisement.AdvertiserFragment;
+import com.example.android.bluetoothadvertisements.scanning.ScannerFragment;
 
 /**
  * Setup display fragments and ensure the device supports Bluetooth.

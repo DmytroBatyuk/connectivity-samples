@@ -49,13 +49,13 @@
         android:layout_height="wrap_content" />
 
     <!--<fragment-->
-        <!--android:name="com.example.android.bluetoothadvertisements.ScannerFragment"-->
+        <!--android:name="com.example.android.bluetoothadvertisements.scanning.ScannerFragment"-->
         <!--android:id="@+id/scanner_fragment"-->
         <!--android:layout_width="match_parent"-->
         <!--android:layout_height="wrap_content" />-->
 
     <!--<fragment-->
-        <!--android:name="com.example.android.bluetoothadvertisements.AdvertiserFragment"-->
+        <!--android:name="com.example.android.bluetoothadvertisements.advertisement.AdvertiserFragment"-->
         <!--android:id="@+id/advertiser_fragment"-->
         <!--android:layout_width="match_parent"-->
         <!--android:layout_height="wrap_content" />-->

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.bluetoothadvertisements;
+package com.example.android.bluetoothadvertisements.scanning;
 
 import android.bluetooth.le.ScanResult;
 import android.content.Context;
@@ -24,6 +24,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import com.example.android.bluetoothadvertisements.R;
+import com.example.android.bluetoothadvertisements.scanning.ScannerFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
