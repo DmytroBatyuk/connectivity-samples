@@ -37,9 +37,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * Holds and displays {@link ScanResult}s, used by {@link ScannerFragment}.
  */
-public class ScanResultAdapter extends BaseAdapter {
+public class ScanResultAdapter extends ScanResultAdapterAbs<ScanResult> {
 
-    private ArrayList<ScanResult> mArrayList;
     private HashMap<String, Long> macAddressToLastSeenTime = new HashMap<>();
 
     private Context mContext;
@@ -50,22 +49,6 @@ public class ScanResultAdapter extends BaseAdapter {
         super();
         mContext = context;
         mInflater = inflater;
-        mArrayList = new ArrayList<>();
-    }
-
-    @Override
-    public int getCount() {
-        return mArrayList.size();
-    }
-
-    @Override
-    public Object getItem(int position) {
-        return mArrayList.get(position);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return mArrayList.get(position).getDevice().getAddress().hashCode();
     }
 
     @Override
@@ -81,7 +64,7 @@ public class ScanResultAdapter extends BaseAdapter {
         TextView lastSeenView = (TextView) view.findViewById(R.id.last_seen);
         TextView beforeSeen = (TextView) view.findViewById(R.id.beforeSeen);
 
-        ScanResult scanResult = mArrayList.get(position);
+        ScanResult scanResult = list.get(position);
 
         String name = scanResult.getDevice().getName();
         if (name == null) {
@@ -109,8 +92,8 @@ public class ScanResultAdapter extends BaseAdapter {
      */
     private int getPosition(String address) {
         int position = -1;
-        for (int i = 0; i < mArrayList.size(); i++) {
-            if (mArrayList.get(i).getDevice().getAddress().equals(address)) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getDevice().getAddress().equals(address)) {
                 position = i;
                 break;
             }
@@ -118,33 +101,31 @@ public class ScanResultAdapter extends BaseAdapter {
         return position;
     }
 
-
-    /**
-     * Add a ScanResult item to the adapter if a result from that device isn't already present.
-     * Otherwise updates the existing position with the new ScanResult.
-     */
-    public void add(ScanResult scanResult) {
-
-        int existingPosition = getPosition(scanResult.getDevice().getAddress());
-
-        if (existingPosition >= 0) {
-            // Device is already in list, update its record.
-            ScanResult scanResultOld = mArrayList.get(existingPosition);
-            macAddressToLastSeenTime.put(scanResultOld.getDevice().getAddress(), scanResultOld.getTimestampNanos());
-            mArrayList.set(existingPosition, scanResult);
-        } else {
-            // Add new Device's ScanResult to list.
-            mArrayList.add(scanResult);
-        }
-    }
-
     /**
      * Clear out the adapter.
      */
     public void clear() {
-        mArrayList.clear();
         macAddressToLastSeenTime.clear();
+        super.clear();
     }
+
+    @Override
+    protected void addInternal(ScanResult scanResult) {
+        int existingPosition = getPosition(scanResult.getDevice().getAddress());
+
+        if (existingPosition >= 0) {
+            // Device is already in list, update its record.
+            ScanResult scanResultOld = list.get(existingPosition);
+            macAddressToLastSeenTime.put(scanResultOld.getDevice().getAddress(), scanResultOld.getTimestampNanos());
+            list.set(existingPosition, scanResult);
+        } else {
+            // Add new Device's ScanResult to list.
+            list.add(scanResult);
+        }
+    }
+
+    @Override
+    protected void addInternal(String text) { }
 
     /**
      * Takes in a number of nanoseconds and returns a human-readable string giving a vague
