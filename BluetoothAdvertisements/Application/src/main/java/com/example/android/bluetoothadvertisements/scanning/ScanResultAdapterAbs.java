@@ -9,6 +9,10 @@ import java.util.List;
 public abstract class ScanResultAdapterAbs<T> extends BaseAdapter {
     protected ArrayList<T> list = new ArrayList<>();
 
+    void setList(List<ScanResult> list) {
+        this.list.clear();
+        add(list);
+    }
     void add(List<ScanResult> list) {
         for (ScanResult scanResult : list) {
             addInternal(scanResult);
