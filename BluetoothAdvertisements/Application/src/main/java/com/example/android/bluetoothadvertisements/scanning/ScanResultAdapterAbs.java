@@ -9,18 +9,26 @@ import java.util.List;
 public abstract class ScanResultAdapterAbs<T> extends BaseAdapter {
     protected ArrayList<T> list = new ArrayList<>();
 
-    void setList(List<ScanResult> list) {
+    void setList(List<ScannerService.Wrapper> list) {
         this.list.clear();
         add(list);
     }
-    void add(List<ScanResult> list) {
-        for (ScanResult scanResult : list) {
-            addInternal(scanResult);
+    void add(List<ScannerService.Wrapper> list) {
+        for (ScannerService.Wrapper w : list) {
+            if (null != w.text) {
+                addInternal(w.text);
+            } else if (null != w.scanResult) {
+                addInternal(w.scanResult);
+            }
         }
         notifyDataSetChanged();
     }
-    void add(ScanResult result) {
-        addInternal(result);
+    void add(ScannerService.Wrapper w) {
+        if (null != w.text) {
+            addInternal(w.text);
+        } else if (null != w.scanResult) {
+            addInternal(w.scanResult);
+        }
         notifyDataSetChanged();
     }
 

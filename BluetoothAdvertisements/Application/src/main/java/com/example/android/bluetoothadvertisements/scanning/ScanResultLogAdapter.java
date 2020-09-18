@@ -10,7 +10,6 @@ import android.widget.TextView;
 import com.example.android.bluetoothadvertisements.R;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 

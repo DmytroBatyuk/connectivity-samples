@@ -48,6 +48,10 @@
             android:enabled="true"
             android:exported="false" >
         </service>
+
+        <service android:name=".scanning.ScannerService"
+            android:enabled="true"
+            android:exported="false" />
     </application>
 
 </manifest>

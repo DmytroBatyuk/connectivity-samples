@@ -38,6 +38,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.android.bluetoothadvertisements.advertisement.AdvertiserFragment;
 import com.example.android.bluetoothadvertisements.scanning.ScannerFragment;
+import com.example.android.bluetoothadvertisements.scanning.ScannerService;
 import com.example.android.bluetoothadvertisements.scanning.StartScannerFragment;
 
 /**
@@ -150,6 +151,18 @@ public class MainActivity extends FragmentActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        ScannerService.list.add(ScannerService.Wrapper.create("foreground"));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        ScannerService.list.add(ScannerService.Wrapper.create("background"));
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (isRefreshVisible) {
             menu.add(Menu.NONE, REFRESH_ID, REFRESH_ID, R.string.refresh)
@@ -206,7 +219,6 @@ public class MainActivity extends FragmentActivity {
             }
         };
         // Fragments can't access system services directly, so pass it the BluetoothAdapter
-        scannerFragment.setBluetoothAdapter(mBluetoothAdapter);
         transaction.replace(R.id.scanner_fragment_container, startScannerFragment);
         transaction.replace(R.id.advertiser_fragment_container, advertiserFragment);
 
